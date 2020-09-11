@@ -1472,7 +1472,7 @@ select
 		when sum(df.cantidad * df.pre_unitario) is not null
 		then format(sum(df.cantidad * df.pre_unitario), 'c', 'en-us')
 		else '$ 0'
-	end	as 'facturacion'
+	end	as 'Facturacion'
 from
 	facturas f inner join detalle_facturas df on f.nro_factura = df.nro_factura
 where
