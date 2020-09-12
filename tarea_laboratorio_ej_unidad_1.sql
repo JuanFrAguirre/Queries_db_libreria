@@ -1380,9 +1380,7 @@ order by
 --7.5 Listar todos los artículos que están a la venta cuyo precio unitario oscile entre 10 y 50; también se quieren listar los artículos que fueron comprados por los clientes cuyos apellidos comiencen con “M” o con “P”
 select
 	'Articulo a la Venta' Tipo,	
-	a.descripcion Descripcion,
-	format(a.pre_unitario, 'C', 'en-us') Precio,
-	'' Cliente
+	a.descripcion Descripcion
 from
 	articulos a
 where
@@ -1390,9 +1388,7 @@ where
 union             
 select
 	'Articulo Vendido',
-	a.descripcion HOLA,
-	format(d.pre_unitario, 'C', 'en-us'),
-	c.ape_cliente + space(2) + c.nom_cliente
+	a.descripcion
 from
 	detalle_facturas d
 	join articulos a on d.cod_articulo = a.cod_articulo
@@ -1401,7 +1397,10 @@ from
 where
 	c.ape_cliente like '[m,p]%'
 
---7.6 El encargado del negocio quiere saber cuánto fue la facturación del año pasado. Por otro lado cuánto es la facturación del mes pasado, la de este mes y la de hoy (Cada pedido en una consulta distinta, y puede unirla en una sola tabla de resultado)--1era tablaselect
+--7.6 El encargado del negocio quiere saber cuánto fue la facturación del año pasado. Por otro lado cuánto es la facturación del mes pasado, la de este mes y la de hoy (Cada pedido en una consulta distinta, y puede unirla en una sola tabla de resultado)
+
+--1era tabla
+select
 	'Año Pasado' Periodo,
 	case 
 		when sum(d.cantidad * d.pre_unitario) is not null 
@@ -1412,8 +1411,8 @@ from
 	facturas f
 	join detalle_facturas d on f.nro_factura = d.nro_factura
 where
-	year(f.fecha) in (year(dateadd(year,-1,getdate())))
-	--year(f.fecha) = year(getdate())-1
+	year(f.fecha) = (year(dateadd(year,-1,getdate())))
+
 	union
 --2da tabla
 select
@@ -1427,9 +1426,9 @@ from
 	facturas f
 	join detalle_facturas d on f.nro_factura = d.nro_factura
 where
-	month(f.fecha) = month(dateadd(month, -1, getdate()))
+	month(f.fecha) = month(dateadd(month,-1,getdate()))
 	and
-	year(f.fecha) = year(dateadd(month, -1, getdate()))
+	year(fecha) = year(dateadd(month,-1,getdate()))
 	union
 --3era tabla
 select
@@ -1474,13 +1473,13 @@ select
 		else '$ 0'
 	end	as 'Facturacion'
 from
-	facturas f inner join detalle_facturas df on f.nro_factura = df.nro_factura
+	facturas f join detalle_facturas df on f.nro_factura = df.nro_factura
 where
 	year(fecha) = year(dateadd(year,+1,getdate()))
 	and
 	month(fecha) = month(getdate())
 	and
-	day(fecha) = day(dateadd(day,0,getdate()))
+	day(fecha) = day(dateadd(day,+1,getdate()))
 order by
 	1,2
 
@@ -1773,8 +1772,5 @@ from
 	right join clientes c on f.cod_cliente = c.cod_cliente
 order by 
 	3
-
-
-
 
 
