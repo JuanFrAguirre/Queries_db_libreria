@@ -156,7 +156,7 @@ c.	delete [from] consultas
 ---------------------------------
 --de nuevo los mecanicos
 
---2.1 Se quiere saber por cada unidad cuánto fue el monto total pagado por año, además cuándo se le realizó el primer y el último mantenimiento y cuántos han sido realizados a estos vehículos en ese período de tiempo. Siempre que el promedio del monto haya sido superior a los $ 2.000.
+--1.1 Se quiere saber por cada unidad cuánto fue el monto total pagado por año, además cuándo se le realizó el primer y el último mantenimiento y cuántos han sido realizados a estos vehículos en ese período de tiempo. Siempre que el promedio del monto haya sido superior a los $ 2.000.
 select
 	year(fec_manenim) Anio, cod_unidad Unidad, sum(monto) 'Monto Total', min(fec_mantenim) 'Primer Mantenim' ,max(fec_mantenim) 'Ulitmo Mantenim', 
 	count(*) 'Cantidad de mantenimientos '
@@ -168,7 +168,7 @@ having
 	avg(monto) > 2000
 
 
---2.2. Emitir un listado con los datos unidades, incluido el nombre del responsable, los mantenimientos realizados a dichas unidades y el mecánico encargado de las mismas. Pero solo aquellos donde el responsable tenga teléfono conocido y los mecánicos tengan especialidad diesel o gas. Ordene por fecha de mantenimiento en forma ascendente y nombre de responsable en forma descendente. Rotule. Para la composición de las tablas utilice Join.
+--1.2. Emitir un listado con los datos unidades, incluido el nombre del responsable, los mantenimientos realizados a dichas unidades y el mecánico encargado de las mismas. Pero solo aquellos donde el responsable tenga teléfono conocido y los mecánicos tengan especialidad diesel o gas. Ordene por fecha de mantenimiento en forma ascendente y nombre de responsable en forma descendente. Rotule. Para la composición de las tablas utilice Join.
 select
 	u.cod_unidad 'Codigo Unidad', marca + space(2) + modelo 'Descripcion Unidad', fec_compra 'Fecha Compra', nombre Responsable, nom_mecanico Mecanico, fec_mantenim 'Fecha Mantenimiento'
 from
@@ -180,7 +180,7 @@ where
 order by
 	6, 4 desc
 
---2.3. ¿Cuánto fue el monto total gastado en mantenimientos el mes pasado? Además, ¿cuántos mantenimientos se realizaron y cuál fue el más caro y el más barato?
+--1.3. ¿Cuánto fue el monto total gastado en mantenimientos el mes pasado? Además, ¿cuántos mantenimientos se realizaron y cuál fue el más caro y el más barato?
 select
 	sum(monto) 'Monto Total', min(monto) 'Monto mas barato' ,max(monto) 'Monto mas caro', 
 	count(*) 'Cantidad de mantenimientos'
@@ -189,7 +189,7 @@ from
 where
 	year(fec_mantenim) = year(dateadd(month,-1,getdate())) and month(fec_mantenim) = month(dateadd(month,-1,getdate()))
 
---2.4. Realice los siguientes movimientos
+--1.4. Realice los siguientes movimientos
 --d. Dar de alta a un nuevo mecánico (cod_mecanico es identity)
 --e. El responsable número 123 actualizó los datos referidos a la dirección y a su teléfono
 --f. Se cometió un cometió un error al registrar el vehículo nro. 35. Debe eliminar dicho registro
@@ -204,3 +204,66 @@ e. update responsables
 
 f. delete from unidades
 	where cod_unidad = 35
+
+---------------------------------
+--cine
+--1. Emitir un listado que contenga: Nombre de la película, fecha, cantidad de ticket vendido por película, y monto total de la venta de ticket, también por película. Para películas vistas en el mes de julio de 2016, en salas con más de 15 filas. cuyo monto total de venta sea inferir a 100.000 pesos.
+select
+	nombre_pelicula 'Nombre Pelicula', day(fecha) Dia, count(nro_ticket) 'Cantidad Tickets', sum(precio) 'Monto Total'
+from
+	ticket t join peliculas_x_sala ps on t.id_pxs = ps.id_pxs
+	join peliculas p on p.id_pelicula = ps.id_pelicula
+	join salas s on s.id_sala = ps.nro_sala
+where
+	month(fecha) = 7 and year(fecha) = 2016 /* fecha between '01/07/2016' and '31/07/2016' */ and cant_filas > 15
+group by
+	nombre_pelicula, day(fecha)
+having
+	sum(precio) < 100000
+
+--2. Listar los datos de las películas y las salas donde se proyectaron en los seis últimos meses (incluido el actual). Rotule y ordene en forma conveniente.
+select
+	p.id_pelicula 'Codigo pelicula', p.nombre_pelicula 'Nombre Pelicula', s.id_sala 'Codigo Sala', s.nombre_sala 'Nombre Sala'
+from
+	pelicula p join peliculas_x_sala ps on p.id_pelicula = ps.id_pelicula
+	join tickets t on t.id_pxs = ps.id_pxs
+	join salas s on s.id_sala = ps.nro_sala
+where
+	abs(datediff( month, fecha, getdate())) <= 6 /* dentro de los ultimos 6 meses */ 
+	fecha >= dateadd(month, -6, getdate()) and fecha <= getdate()
+order by
+	1,2,3,4
+
+--3. Se quiere saber cuáles son las películas proyectadas en el año 2015; y en la misma tabla de resultado mostrar las películas proyectadas el día ‘miércoles’ de todos los años. Determine Ud. las columnas a mostrar, para que se pueda identificar que información representa cada fila de resultado.
+select
+	'Año 2015' 'Periodo de tiempo', p.id_pelicula 'Codigo Pelicula', p.nombre_pelicula 'Nombre Pelicula'
+from
+	peliculas p join peliculas_x_salas ps on p.id_pelicula = ps.idPelicula
+	join tickets t on t.id_pxs = ps.id_pxs
+where						
+	year(fecha) = 2015			
+union						
+select						
+	'Dias Miercoles', p.id_pelicula 'Codigo Pelicula', p.nombre_pelicula 'Nombre Pelicula'				
+from
+	peliculas p join peliculas_x_salas ps on p.id_pelicula = ps.idPelicula
+	join tickets t on t.id_pxs = ps.id_pxs
+where
+	weekday(fecha) like '%mi_rcoles%'
+	ps.diaSemana like '%mi_rcoles%' --es la una o la otra segun si el campo diaSemana hace ref al dia real o a alguna promocion. En caso de que sea el dia real de la semana, no haria falta agregar en el from la tabla tickets
+order by
+	1
+
+--4. Se quiere obtener información sobre cantidad películas proyectadas este año, el promedio de precio cobrado y la primera fecha de proyección. 
+select
+	count( id_pelicula ) /*aca no puse el distinct porque la fk se llama distinto */ 'Cantidad de pelicula', avg(precio) 'Precio Promedio', min(fecha) 'Primer Fecha Proyeccion'
+from
+	peliculas p join peliculas_x_salas ps on p.id_pelicula = ps.idPelicula
+	join tickets t on t.id_pxs = ps.id_pxs
+where
+	year(fecha) = year(getdate())
+
+--5. Realice los siguientes movimientos
+--a. Dar de alta a un nueva película.
+--b. Cambiarle el nombre de la película a ‘volver al futuro’ para la película de id = 7521.
+--c. Hay que eliminar de la base de datos la película id = 7522.a. insert into peliculas values (35, 'El Rey Boller')b. update peliculas 	set nombre_pelicula = 'volver al futuro' 	where id_pelicula =7521c. delete from peliculas	where id_pelicula = 7522
