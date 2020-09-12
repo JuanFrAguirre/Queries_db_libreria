@@ -1483,6 +1483,16 @@ where
 order by
 	1,2
 
+
+	--dateadd( day , -4 , getdate() )
+	la fecha del dia de hace 4 dias =dateadd(day,-4,getdate())
+
+	day(fecha) = day(dateadd(day,-2,getdate()))
+	and
+	month(fecha) = month(dateadd(month,-1,getdate()))
+
+	--abs(datediff( day,  12/09/2020 , 12/09/2021 )) ---> 365
+
 ---------------------------------------------------------------------------------
 ------------------------------------- 8
 ---------------------------------------------------------------------------------

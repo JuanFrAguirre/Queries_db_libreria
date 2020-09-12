@@ -256,7 +256,7 @@ order by
 
 --4. Se quiere obtener información sobre cantidad películas proyectadas este año, el promedio de precio cobrado y la primera fecha de proyección. 
 select
-	count( id_pelicula ) /*aca no puse el distinct porque la fk se llama distinto */ 'Cantidad de pelicula', avg(precio) 'Precio Promedio', min(fecha) 'Primer Fecha Proyeccion'
+	count(distinct id_pelicula ) /*aca podriamos no poner el distinct porque la fk se llama distinto */ 'Cantidad de pelicula', avg(precio) 'Precio Promedio', min(fecha) 'Primer Fecha Proyeccion'
 from
 	peliculas p join peliculas_x_salas ps on p.id_pelicula = ps.idPelicula
 	join tickets t on t.id_pxs = ps.id_pxs
